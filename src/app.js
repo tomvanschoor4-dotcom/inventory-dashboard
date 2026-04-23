@@ -73,7 +73,7 @@ function buildWeekColumns(data) {
 function getMetricValue(row, weekKey, metric) {
   switch (metric) {
     case "bop":
-      return row.weeklyBOP[weekKey] ?? 0;
+      return row.weeklyATP[weekKey] ?? 0;
     case "onOrder":
       return row.weeklyOnOrder[weekKey] ?? 0;
     case "backorder":
@@ -84,7 +84,7 @@ function getMetricValue(row, weekKey, metric) {
       return row.weeklyRecommended[weekKey] ?? 0;
     case "projected":
     default:
-      return (row.weeklyBOP[weekKey] ?? 0) + (row.weeklyOnOrder[weekKey] ?? 0);
+      return (row.weeklyATP[weekKey] ?? 0) + (row.weeklyOnOrder[weekKey] ?? 0);
   }
 }
 
@@ -108,6 +108,7 @@ function pivotData(rawData) {
     const backorderUnits = toNumber(row["Backorder U BOP"]);
     const forecastUnits = toNumber(row["Effective Forecast Units"]);
     const recommendedUnits = toNumber(row["Recommended Order Units DC"]);
+    const atpUnits = bopUnits - backorderUnits;
 
     if (!map[sku]) {
       map[sku] = {
@@ -117,7 +118,7 @@ function pivotData(rawData) {
         collection,
         size: "—",
         color: "—",
-        weeklyBOP: {},
+        weeklyATP: {},
         weeklyOnOrder: {},
         weeklyBackorder: {},
         weeklyForecast: {},
@@ -126,7 +127,7 @@ function pivotData(rawData) {
     }
 
     // SUM values instead of overwriting, because there can be multiple rows per SKU/week
-    map[sku].weeklyBOP[fiscalWeek] = (map[sku].weeklyBOP[fiscalWeek] ?? 0) + bopUnits;
+    map[sku].weeklyATP[fiscalWeek] = (map[sku].weeklyATP[fiscalWeek] ?? 0) + atpUnits;
     map[sku].weeklyOnOrder[fiscalWeek] = (map[sku].weeklyOnOrder[fiscalWeek] ?? 0) + onOrderUnits;
     map[sku].weeklyBackorder[fiscalWeek] = (map[sku].weeklyBackorder[fiscalWeek] ?? 0) + backorderUnits;
     map[sku].weeklyForecast[fiscalWeek] = (map[sku].weeklyForecast[fiscalWeek] ?? 0) + forecastUnits;
