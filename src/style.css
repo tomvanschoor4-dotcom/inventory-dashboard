@@ -1,27 +1,142 @@
 body {
+  margin: 0;
   font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f5f5f5;
+  background: #f4f6f8;
+  color: #1f2937;
 }
 
-h1 {
+.page {
+  padding: 24px;
+}
+
+.topbar h1 {
+  margin: 0 0 8px;
+}
+
+.topbar p {
+  margin: 0 0 20px;
+  color: #6b7280;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.controls input,
+.controls select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  background: white;
+}
+
+.controls input {
+  min-width: 280px;
+}
+
+.cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.card p {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.table-wrap {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  overflow: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 75vh;
 }
 
 table {
   border-collapse: collapse;
-  width: 100%;
-  background: white;
-  font-size: 12px;
+  width: max-content;
+  min-width: 100%;
+  font-size: 13px;
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 6px;
+th,
+td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
   text-align: left;
+  white-space: nowrap;
 }
 
 th {
-  background-color: #222;
+  background: #111827;
   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+td:first-child,
+th:first-child {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 1;
+}
+
+th:first-child {
+  background: #111827;
+  z-index: 3;
+}
+
+td:nth-child(2),
+th:nth-child(2) {
+  position: sticky;
+  left: 110px;
+  background: white;
+  z-index: 1;
+}
+
+th:nth-child(2) {
+  background: #111827;
+  z-index: 3;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+.neg {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.low {
+  background: #fef3c7 !important;
+  font-weight: 700;
+}
+
+.zero {
+  color: #6b7280;
 }

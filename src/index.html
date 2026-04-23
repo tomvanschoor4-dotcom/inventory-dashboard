@@ -3,12 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inventory Dashboard</title>
+  <title>SKU Inventory Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Inventory Dashboard</h1>
-  <table id="data-table"></table>
+  <div class="page">
+    <header class="topbar">
+      <div>
+        <h1>SKU Inventory Dashboard</h1>
+        <p id="status">Loading data...</p>
+      </div>
+    </header>
+
+    <section class="controls">
+      <input type="text" id="skuSearch" placeholder="Search SKU or SKU Name..." />
+      <select id="classFilter">
+        <option value="">All Classes</option>
+      </select>
+
+      <select id="metricSelector">
+        <option value="projected">On Hand + On Order</option>
+        <option value="bop">On Hand Only</option>
+        <option value="onOrder">On Order Only</option>
+        <option value="backorder">Backorder</option>
+        <option value="forecast">Forecast</option>
+        <option value="recommended">Recommended Order</option>
+      </select>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <h3>SKUs Shown</h3>
+        <p id="skuCount">--</p>
+      </div>
+      <div class="card">
+        <h3>Current Inventory</h3>
+        <p id="totalInventory">--</p>
+      </div>
+      <div class="card">
+        <h3>Low Inventory SKUs</h3>
+        <p id="lowInventoryCount">--</p>
+      </div>
+    </section>
+
+    <section class="table-wrap">
+      <table id="skuTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="app.js"></script>
