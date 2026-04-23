@@ -43,12 +43,38 @@ function monthNameToNumber(month) {
   return map[String(month || "").toUpperCase()] || 99;
 }
 
+function findField(row, possibleNames) {
+  const keys = Object.keys(row);
+
+  for (const name of possibleNames) {
+    const match = keys.find(key => key.trim().toLowerCase() === name.toLowerCase());
+    if (match) return row[match];
+  }
+
+  return "";
+}
+
+function fiscalWeekToDateLabel(fiscalWeek) {
+  const weekString = String(fiscalWeek);
+
+  const fiscalYear = Number(weekString.slice(0, 4));
+  const weekNumber = Number(weekString.slice(4));
+
+  // Based on your workbook:
+  // Fiscal week 202601 starts on 2/2/2026
+  const fiscalYearStart = new Date(2026,1,2);
+
+  const date = new Date(fiscalYearStart);
+  date.setDate(fiscalYearStart.getDate() + (weekNumber - 1) * 7);
+
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
 function buildWeekColumns(data) {
   const weeks = data
     .filter(row => monthNameToNumber(row["Fiscal Month Desc"]) <= 12)
     .map(row => ({
-      fiscalWeek: Number(row["Fiscal Week"]),
-      month: String(row["Fiscal Month Desc"] || "").toUpperCase()
+      fiscalWeek: Number(row["Fiscal Week"])
     }))
     .filter(row => !isNaN(row.fiscalWeek));
 
@@ -66,7 +92,7 @@ function buildWeekColumns(data) {
 
   return unique.map(w => ({
     key: String(w.fiscalWeek),
-    label: String(w.fiscalWeek)
+    label: fiscalWeekToDateLabel(w.fiscalWeek)
   }));
 }
 
@@ -84,7 +110,7 @@ function getMetricValue(row, weekKey, metric) {
       return row.weeklyRecommended[weekKey] ?? 0;
     case "projected":
     default:
-      return (row.weeklyATP[weekKey] ?? 0) + (row.weeklyOnOrder[weekKey] ?? 0);
+      return (row.weeklyATP[weekKey] ?? 0);
   }
 }
 
@@ -92,6 +118,10 @@ function pivotData(rawData) {
   const map = {};
 
   rawData.forEach(row => {
+    const omniChannel = String(row["Omni Channel"] || "").trim();
+
+    if (omniChannel !== "DTC") return;
+
     const monthDesc = String(row["Fiscal Month Desc"] || "").toUpperCase();
     if (monthNameToNumber(monthDesc) > 12) return;
 
@@ -104,10 +134,11 @@ function pivotData(rawData) {
     const collection = String(row["Collection"] || "").trim();
 
     const bopUnits = toNumber(row["BOP U"]);
-    const onOrderUnits = toNumber(row["On Order Units"]);
     const backorderUnits = toNumber(row["Backorder U BOP"]);
+    const receiptUnits = toNumber(row["U Receipts"]);
     const forecastUnits = toNumber(row["Effective Forecast Units"]);
     const recommendedUnits = toNumber(row["Recommended Order Units DC"]);
+
     const atpUnits = bopUnits - backorderUnits;
 
     if (!map[sku]) {
@@ -119,6 +150,7 @@ function pivotData(rawData) {
         size: "—",
         color: "—",
         weeklyATP: {},
+        weeklyReceipts: {},
         weeklyOnOrder: {},
         weeklyBackorder: {},
         weeklyForecast: {},
@@ -126,15 +158,38 @@ function pivotData(rawData) {
       };
     }
 
-    // SUM values instead of overwriting, because there can be multiple rows per SKU/week
-    map[sku].weeklyATP[fiscalWeek] = (map[sku].weeklyATP[fiscalWeek] ?? 0) + atpUnits;
-    map[sku].weeklyOnOrder[fiscalWeek] = (map[sku].weeklyOnOrder[fiscalWeek] ?? 0) + onOrderUnits;
-    map[sku].weeklyBackorder[fiscalWeek] = (map[sku].weeklyBackorder[fiscalWeek] ?? 0) + backorderUnits;
-    map[sku].weeklyForecast[fiscalWeek] = (map[sku].weeklyForecast[fiscalWeek] ?? 0) + forecastUnits;
-    map[sku].weeklyRecommended[fiscalWeek] = (map[sku].weeklyRecommended[fiscalWeek] ?? 0) + recommendedUnits;
+    map[sku].weeklyATP[fiscalWeek] =
+      (map[sku].weeklyATP[fiscalWeek] ?? 0) + atpUnits;
+
+    map[sku].weeklyReceipts[fiscalWeek] =
+      (map[sku].weeklyReceipts[fiscalWeek] ?? 0) + receiptUnits;
+
+    map[sku].weeklyBackorder[fiscalWeek] =
+      (map[sku].weeklyBackorder[fiscalWeek] ?? 0) + backorderUnits;
+
+    map[sku].weeklyForecast[fiscalWeek] =
+      (map[sku].weeklyForecast[fiscalWeek] ?? 0) + forecastUnits;
+
+    map[sku].weeklyRecommended[fiscalWeek] =
+      (map[sku].weeklyRecommended[fiscalWeek] ?? 0) + recommendedUnits;
   });
 
-  return Object.values(map);
+  const rows = Object.values(map);
+
+rows.forEach(row => {
+  let runningOnOrder = 0;
+
+  weekColumns.forEach((week, index) => {
+    const weekKey = week.key;
+
+    row.weeklyOnOrder[weekKey] = runningOnOrder;
+
+    const receiptsThisWeek = row.weeklyReceipts[weekKey] ?? 0;
+    runningOnOrder += receiptsThisWeek;
+  });
+});
+
+  return rows;
 }
 
 function renderCards(rows) {
