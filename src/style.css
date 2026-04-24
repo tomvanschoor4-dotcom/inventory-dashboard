@@ -68,14 +68,26 @@ body {
 .table-wrap {
   background: white;
   border-radius: 14px;
-  padding: 16px;
+  padding: 0 16px 16px 16px;
   overflow: auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   max-height: 75vh;
+  position: relative;
+}
+
+.table-wrap::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  display: block;
+  height: 16px;
+  background: white;
+  z-index: 60;
 }
 
 table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: max-content;
   min-width: 100%;
   font-size: 13px;
@@ -87,43 +99,53 @@ td {
   padding: 10px 12px;
   text-align: left;
   white-space: nowrap;
+  background: white;
 }
 
 th {
   background: #111827;
   color: white;
   position: sticky;
-  top: 0;
-  z-index: 2;
+  top: 16px;
+  z-index: 50;
 }
 
 td:first-child,
 th:first-child {
   position: sticky;
   left: 0;
-  background: white;
-  z-index: 1;
+  min-width: 90px;
+}
+
+td:first-child {
+  z-index: 4;
 }
 
 th:first-child {
-  background: #111827;
-  z-index: 3;
+  z-index: 30;
 }
 
 td:nth-child(2),
 th:nth-child(2) {
   position: sticky;
-  left: 110px;
-  background: white;
-  z-index: 1;
+  left: 115px;
+  min-width: 300px;
+}
+
+td:nth-child(2) {
+  z-index: 4;
 }
 
 th:nth-child(2) {
-  background: #111827;
-  z-index: 3;
+  z-index: 30;
 }
 
-tbody tr:hover {
+tbody tr:hover td {
+  background: #f9fafb;
+}
+
+tbody tr:hover td:first-child,
+tbody tr:hover td:nth-child(2) {
   background: #f9fafb;
 }
 

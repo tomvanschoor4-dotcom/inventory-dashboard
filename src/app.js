@@ -147,8 +147,6 @@ function pivotData(rawData) {
         skuName,
         className,
         collection,
-        size: "—",
-        color: "—",
         weeklyATP: {},
         weeklyReceipts: {},
         weeklyOnOrder: {},
@@ -210,6 +208,18 @@ function renderCards(rows) {
   lowInventoryCountEl.textContent = lowInventoryCount.toLocaleString();
 }
 
+function getRunoutWeek(row) {
+  for (const week of weekColumns) {
+    const value = getMetricValue(row, week.key, "projected");
+
+    if (value < 0) {
+      return week.label;
+    }
+  }
+
+  return "—";
+}
+
 function renderTable(rows) {
   tableHead.innerHTML = "";
   tableBody.innerHTML = "";
@@ -221,8 +231,7 @@ function renderTable(rows) {
     "SKU Name",
     "Class",
     "Collection",
-    "Size",
-    "Color"
+    "Runout Week"
   ];
 
   const headerRow = document.createElement("tr");
@@ -249,8 +258,7 @@ function renderTable(rows) {
       row.skuName,
       row.className,
       row.collection,
-      row.size,
-      row.color
+      getRunoutWeek(row)
     ];
 
     staticValues.forEach(value => {
